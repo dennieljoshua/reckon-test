@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { createRangeArray, hasNoRemainer, reckonClient } from "./utils/utils";
+import { createRangeArray, hasNoRemainder, reckonClient } from "./utils/utils";
 
 const app = express();
 
@@ -19,7 +19,7 @@ app.get("/", async function testOne(req: Request, res: Response) {
 
   for (let i of createRangeArray(lower, upper)) {
     responseString += `${i}: ${divisors
-      .filter((d) => hasNoRemainer(i, d.divisor))
+      .filter((d) => hasNoRemainder(i, d.divisor))
       .map((divisor) => divisor.output)
       .join("")} \n`;
   }

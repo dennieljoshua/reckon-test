@@ -22,7 +22,7 @@ export function createRangeArray(start: number, end: number) {
   return Array.apply(null, arr).map((_, n) => n + start);
 }
 
-export function hasNoRemainer(n: number, divisor: number) {
+export function hasNoRemainder(n: number, divisor: number) {
   if (n === 0 || divisor === 0) {
     return false; // cant divide by 0
   }
