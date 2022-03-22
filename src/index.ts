@@ -8,7 +8,7 @@ interface Divisor {
   output: string;
 }
 
-interface TestTwoResponse {
+interface TestTwoResult {
   candidate: string;
   text: string;
   results: Array<{ subtext: string; result: string }>;
@@ -39,8 +39,10 @@ app.post("/test2", async function testTwo(req: Request, res: Response) {
 
   const textToSearch = textData.text?.toLocaleLowerCase();
 
-  const resultsDictionary: { [subText: string]: Array<number | string> } = {};
+  const resultsDictionary: { [subText: string]: Array<string> } = {};
 
+  // Algo from this youtuber, Thanks! youtuber https://www.youtube.com/watch?v=I5vWuso82jA
+  // Adapted it a bit so it works with an array of words to search
   for (const subText of subTextData.subTexts) {
     const normalized: string = subText.toLocaleLowerCase();
 
@@ -53,11 +55,10 @@ app.post("/test2", async function testTwo(req: Request, res: Response) {
         }
 
         if (j === normalized.length - 1) {
-          console.log(`Matched ${normalized} starting at index: ${i}`);
           if (!Array.isArray(resultsDictionary[subText])) {
             resultsDictionary[subText] = [];
           }
-          resultsDictionary[subText].push(i + 1);
+          resultsDictionary[subText].push(`${i + 1}`); // +1 because index starts at 0 but text search starts with 1
         }
       }
     }
@@ -68,16 +69,24 @@ app.post("/test2", async function testTwo(req: Request, res: Response) {
     }
   }
 
-  const response: TestTwoResponse = {
+  const result: TestTwoResult = {
     candidate: "Denniel Joshua T. Diaz",
     text: textData.text,
     results: Object.entries(resultsDictionary).map(([key, value]) => ({
       subtext: key,
-      result: value.toString(),
+      result: value.reduce((str, current) => str + ", " + current),
     })),
   };
 
-  return res.json(response);
+  const submitResponse = await reckonClient.post(
+    "/test2/submitResults",
+    result
+  );
+
+  return res.json({
+    submittedData: result,
+    response: submitResponse.data,
+  });
 });
 
 app.listen(9999, () =>
