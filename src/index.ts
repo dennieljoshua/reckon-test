@@ -1,5 +1,10 @@
 import express, { Request, Response } from "express";
-import { createRangeArray, hasNoRemainder, reckonClient } from "./utils/utils";
+import {
+  createRangeArray,
+  hasNoRemainder,
+  reckonClient,
+  stringSearch,
+} from "./utils/utils";
 
 const app = express();
 
@@ -39,35 +44,7 @@ app.post("/test2", async function testTwo(req: Request, res: Response) {
 
   const textToSearch = textData.text?.toLocaleLowerCase();
 
-  const resultsDictionary: { [subText: string]: Array<string> } = {};
-
-  // Algo from this youtuber, Thanks! youtuber https://www.youtube.com/watch?v=I5vWuso82jA
-  // Adapted it a bit so it works with an array of words to search
-  for (const subText of subTextData.subTexts) {
-    const normalized: string = subText.toLocaleLowerCase();
-
-    for (let i = 0; i < textToSearch.length; i++) {
-      for (let j = 0; j < normalized.length; j++) {
-        const subChar = normalized[j];
-
-        if (subChar !== textToSearch[i + j]) {
-          break;
-        }
-
-        if (j === normalized.length - 1) {
-          if (!Array.isArray(resultsDictionary[subText])) {
-            resultsDictionary[subText] = [];
-          }
-          resultsDictionary[subText].push(`${i + 1}`); // +1 because index starts at 0 but text search starts with 1
-        }
-      }
-    }
-
-    // No match
-    if (!Array.isArray(resultsDictionary[subText])) {
-      resultsDictionary[subText] = ["<No Output>"];
-    }
-  }
+  const resultsDictionary = stringSearch(textToSearch, subTextData.subTexts);
 
   const result: TestTwoResult = {
     candidate: "Denniel Joshua T. Diaz",
